@@ -4,22 +4,57 @@
     <style type="text/css">
       html, body, #map-canvas { height: 95%; width: 95%;margin: 5; padding: 20;}
     </style>
-    <script type="text/javascript"
-      src="https://maps.googleapis.com/maps/api/js?key=APIKEY">
+    <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCtBFnwmv8DYhRCPQ4fAJ8QCYNgInlrd0k">
     </script>
+        <script src="https://maps.googleapis.com/maps/api/js?libraries=geometry,visualization"></script>
     <script type="text/javascript">
-      function initialize() {
-        var mapOptions = {
-          center: { lat: -34.397, lng: 150.644},
-          zoom: 8
-        };
-        var map = new google.maps.Map(document.getElementById('map-canvas'),
-            mapOptions);
-      }
-      google.maps.event.addDomListener(window, 'load', initialize);
-    </script>
+
+    var map;
+
+    function initialize() {
+      var mapOptions = {
+      zoom: 2,
+      center: {lat: -33.865427, lng: 151.196123},
+      mapTypeId: google.maps.MapTypeId.TERRAIN
+      };
+
+    map = new google.maps.Map(document.getElementById('map-canvas'),mapOptions);
+
+    // Create a <script> tag and set the USGS URL as the source.
+    var script = document.createElement('script');
+
+    //script.src = 'http://earthquake.usgs.gov/earthquakes/feed/geojsonp/2.5/week';
+    script.src = 'http://comcat.cr.usgs.gov/fdsnws/event/1/query?starttime=2014-01-08%2000:00:00&minmagnitude=6&format=geojson&callback=eqfeed_callback&endtime=2015-01-15%2023:59:59&orderby=time';
+    document.getElementsByTagName('head')[0].appendChild(script);
+
+    map.data.setStyle(function(feature) {
+      var magnitude = feature.getProperty('mag');
+      return {
+        icon: getCircle(magnitude)
+      };
+      });
+    }
+
+  function getCircle(magnitude) {
+    var circle = {
+      path: google.maps.SymbolPath.CIRCLE,
+      fillColor: 'blue',
+      fillOpacity: .4,
+      scale: Math.pow(2, magnitude) / 4,
+      strokeColor: 'white',
+      strokeWeight: .5
+    };
+    return circle;
+  }
+
+  function eqfeed_callback(results) {
+    map.data.addGeoJson(results);
+  }
+  google.maps.event.addDomListener(window, 'load', initialize);
+  
+  </script>
   </head>
-  <body>
-<div id="map-canvas"></div>
+  <body onload="initialize()">
+    <div id="map-canvas"></div>
   </body>
 </html>
